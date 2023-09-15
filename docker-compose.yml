@@ -1,0 +1,185 @@
+version: '3.9'
+
+services:
+  # Setup chitchat-api node app
+  chitchat-api:
+    container_name: chitchat-api
+    image: chitchat-api
+    build:
+      context: .
+    #entrypoint: sh -c 'sleep 20 && npm run start:prod'
+      ### For development run
+      target: development
+    entrypoint: sh -c 'sleep 5 && npm run dev'
+    volumes:
+      - ./src:/app/chitchat-api/src
+    ###
+    env_file:
+      - .env
+    ports:
+      - '9090:9090'
+    restart: always
+    depends_on:
+      - mongors-0
+    networks:
+      - network-bridge
+
+  # Setup MongoDB cluster
+  mongo-replica-setup:
+    container_name: mongo-replica-setup
+    image: 'mongo:4.4'
+    restart: on-failure
+    networks:
+      - network-bridge
+    volumes:
+      - ./.docker/mongodb/scripts/mongo-init.sh:/scripts/mongo-init.sh
+    entrypoint: [ 'bash', '/scripts/mongo-init.sh' ]
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    depends_on:
+      - mongors-0
+      - mongors-1
+      - mongors-2
+
+  # MongoDB replica set PRIMARY
+  mongors-0:
+    hostname: 'mongors-0'
+    container_name: 'mongors-0'
+    image: 'mongo:4.4'
+    restart: always
+    command:
+      [
+        '-f',
+        '/etc/mongod.conf',
+        '--port',
+        '30001',
+        '--keyFile',
+        '/auth/file.key',
+        '--replSet',
+        '${MONGODB_REPLICA_SET_NAME}',
+        '--bind_ip_all'
+      ]
+    expose:
+      - 30001
+    ports:
+      - 30001:30001
+    networks:
+      - network-bridge
+    volumes:
+      - mongoData1:/data/db
+      - mongoLog1:/var/log/mongodb
+      - ./.docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./.docker/mongodb/mongod.conf:/etc/mongod.conf
+      - ./.docker/mongodb/file.key:/auth/file.key
+    healthcheck:
+      test: echo 'rs.status().ok' | mongo --port 30001 admin -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet | grep 1
+      interval: 30s
+      start_period: 60s
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGODB_REPLICA_SET_NAME: ${MONGODB_REPLICA_SET_NAME}
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASS: ${MONGODB_PASS}
+      MONGODB_NAME: ${MONGODB_NAME}
+
+  # MongoDB replica set SECONDARY
+  mongors-1:
+    hostname: 'mongors-1'
+    container_name: 'mongors-1'
+    image: 'mongo:4.4'
+    command:
+      [
+        '-f',
+        '/etc/mongod.conf',
+        '--port',
+        '30002',
+        '--keyFile',
+        '/auth/file.key',
+        '--replSet',
+        '${MONGODB_REPLICA_SET_NAME}',
+        '--bind_ip_all'
+      ]
+    restart: always
+    expose:
+      - 30002
+    ports:
+      - 30002:30002
+    networks:
+      - network-bridge
+    volumes:
+      - mongoData2:/data/db
+      - mongoLog2:/var/log/mongodb
+      - ./.docker/mongodb/mongod.conf:/etc/mongod.conf
+      - ./.docker/mongodb/file.key:/auth/file.key
+    env_file:
+      - .env
+    healthcheck:
+      test: echo 'db.runCommand({serverStatus:1}).ok' | mongo --port 30002 admin -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet | grep 1
+      interval: 30s
+      start_period: 60s
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGODB_NAME: ${MONGODB_NAME}
+    depends_on:
+      - mongors-0
+
+  # MongoDB replica set SECONDARY
+  mongors-2:
+    hostname: 'mongors-2'
+    container_name: 'mongors-2'
+    image: 'mongo:4.4'
+    command:
+      [
+        '-f',
+        '/etc/mongod.conf',
+        '--port',
+        '30003',
+        '--keyFile',
+        '/auth/file.key',
+        '--replSet',
+        '${MONGODB_REPLICA_SET_NAME}',
+        '--bind_ip_all'
+      ]
+    restart: always
+    expose:
+      - 30003
+    ports:
+      - 30003:30003
+    networks:
+      - network-bridge
+    volumes:
+      - mongoData3:/data/db
+      - mongoLog3:/var/log/mongodb
+      - ./.docker/mongodb/mongod.conf:/etc/mongod.conf
+      - ./.docker/mongodb/file.key:/auth/file.key
+    env_file:
+      - .env
+    healthcheck:
+      test: echo 'db.runCommand({serverStatus:1}).ok' | mongo --port 30003 admin -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet | grep 1
+      interval: 30s
+      start_period: 60s
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGODB_NAME: ${MONGODB_NAME}
+    depends_on:
+      - mongors-0
+
+volumes:
+  mongoData1:
+  mongoData2:
+  mongoData3:
+  mongoLog1:
+  mongoLog2:
+  mongoLog3:
+
+
+networks:
+  network-bridge:
