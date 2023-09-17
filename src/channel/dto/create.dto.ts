@@ -1,4 +1,4 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -40,5 +40,3 @@ export class CreateChannelDto {
   @OneMemberIfPrivate()
   readonly memberIds: ObjectId[];
 }
-
-export class AddMembersDto extends PickType(CreateChannelDto, ['memberIds'] as const) {}

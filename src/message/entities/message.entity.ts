@@ -22,13 +22,13 @@ export class Message {
   public content: string;
 
   @Prop({ type: mongooseSchema.Types.ObjectId, ref: Message.name, default: null })
-  public parentId: Message | null;
+  public parentId: ObjectId | null;
 
   @Prop({ type: mongooseSchema.Types.ObjectId, ref: Channel.name })
-  public channel: Channel[];
+  public channel: Channel | ObjectId;
 
   @Prop({ type: mongooseSchema.Types.ObjectId, ref: User.name })
-  public sender: User[];
+  public senderId: ObjectId;
 
   @Prop({ type: Date, default: Date.now })
   public createdAt: Date;

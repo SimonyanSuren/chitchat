@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, RouterModule } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { ChannelModule } from './channel/channel.module';
 import { validate } from './common/config/env.validation';
@@ -17,6 +17,18 @@ import { UserModule } from './user/user.module';
       cache: true,
       isGlobal: true,
     }),
+    RouterModule.register([
+      {
+        path: 'channel',
+        module: ChannelModule,
+        children: [
+          {
+            path: ':channelId',
+            module: MessageModule,
+          },
+        ],
+      },
+    ]),
     DataBaseModule,
     AuthModule,
     UserModule,

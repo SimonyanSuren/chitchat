@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repositories } from '../database/repositories';
-import { CreateChannelDto } from './dto/channel.dto';
+import { CreateChannelDto } from './dto/create.dto';
 import { Channel } from './entities/channel.entity';
 
 @Injectable()
@@ -48,5 +48,15 @@ export class ChannelService {
     name: string
   ): Promise<{ _id: Channel['id'] } | null> {
     return this.repositories.CHANNEL.exists({ ownerId: ownerId, name: name });
+  }
+
+  public async findChannelByIdAndUserId(
+    id: ObjectId,
+    userId: ObjectId
+  ): Promise<Channel | null> {
+    return this.repositories.CHANNEL.findOne({
+      id,
+      members: { $in: [userId] },
+    });
   }
 }

@@ -28,10 +28,11 @@ import { MongoIdValidationPipe } from '../common/pipes/mongoIdValidation.pipe';
 import { Repositories } from '../database/repositories';
 import { User } from '../user/entities/user.entity';
 import { ChannelService } from './channel.service';
-import { AddMembersDto, CreateChannelDto } from './dto/channel.dto';
+import { AddMembersDto } from './dto/addMembers.dto';
+import { CreateChannelDto } from './dto/create.dto';
 import { Channel } from './entities/channel.entity';
 
-@Controller('channel')
+@Controller()
 @ApiTags('Channel')
 @ApiDefaultResponse({ type: IErrorResponse, description: 'Default error response.' })
 export class ChannelController {
