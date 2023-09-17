@@ -31,8 +31,8 @@ import { Repositories } from '../database/repositories';
 import { User } from '../user/entities/user.entity';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
 
-@ApiTags('Auth')
 @Controller('auth')
+@ApiTags('Auth')
 @ApiDefaultResponse({ type: IErrorResponse, description: 'Default error response.' })
 @UseInterceptors(MongooseClassSerializer(User))
 export class AuthController {

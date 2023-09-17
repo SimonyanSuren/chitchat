@@ -5,7 +5,6 @@ import {
   FilterQuery,
   InferId,
   InsertManyOptions,
-  MongooseBulkWriteOptions,
   PipelineStage,
   ProjectionType,
   Query,
@@ -14,7 +13,6 @@ import {
   UpdateQuery,
   UpdateWithAggregationPipeline,
   UpdateWriteOpResult,
-  mongo,
 } from 'mongoose';
 import { IPagination } from '../../common/interfaces/pagination.interface';
 

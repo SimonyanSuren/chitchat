@@ -4,9 +4,15 @@ import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 import { Channel, ChannelSchema } from '../channel/entities/channel.entity';
+import { Message, MessageSchema } from '../message/entities/message.entity';
 import { User, UserSchema } from '../user/entities/user.entity';
 import { mongooseBaseSchemaOptionsPlugin } from './baseSchemaOptions';
-import { ChannelRepository, Repositories, UserRepository } from './repositories';
+import {
+  ChannelRepository,
+  MessageRepository,
+  Repositories,
+  UserRepository,
+} from './repositories';
 
 @Global()
 @Module({
@@ -33,13 +39,15 @@ import { ChannelRepository, Repositories, UserRepository } from './repositories'
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Channel.name, schema: ChannelSchema },
+      { name: Message.name, schema: MessageSchema },
     ]),
   ],
-  providers: [Repositories, UserRepository, ChannelRepository],
+  providers: [Repositories, UserRepository, ChannelRepository, MessageRepository],
   exports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Channel.name, schema: ChannelSchema },
+      { name: Message.name, schema: MessageSchema },
     ]),
     Repositories,
   ],

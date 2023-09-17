@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ValidationArguments,
   ValidationOptions,
@@ -7,24 +8,35 @@ import {
 import { Types } from 'mongoose';
 
 export function ValidateAndTransformMongoId(validationOptions?: ValidationOptions) {
-  return (object: object, propertyName: string) => {
+  return (object: object, propertyName: string): void => {
     registerDecorator({
-      name: 'ValidateAndTransformMongoId',
+      name: 'validateAndTransformMongoId',
       target: object.constructor,
       propertyName: propertyName,
       constraints: [],
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (
-            isMongoId(value) &&
-            (args.object[args.property] = new Types.ObjectId(value))
-          )
+          const initialValue = args.object[propertyName];
+          let validatedValue: ObjectId | ObjectId[];
+
+          if (isMongoId(value)) {
+            if (validationOptions?.each && Array.isArray(initialValue)) {
+              validatedValue =
+                initialValue.indexOf(value) === 0
+                  ? [new Types.ObjectId(value)]
+                  : [new Types.ObjectId(value), ...initialValue];
+            } else {
+              validatedValue = new Types.ObjectId(value);
+            }
+
+            args.object[propertyName] = validatedValue;
             return true;
+          }
 
           return false;
         },
-        defaultMessage(args: ValidationArguments) {
+        defaultMessage() {
           return '$property is invalid MongoDB Id.';
         },
       },
