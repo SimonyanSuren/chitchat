@@ -38,5 +38,5 @@ export class CreateChannelDto {
     message: 'each value in memberIds must be a valid MongoDB Id',
   })
   @OneMemberIfPrivate()
-  readonly memberIds: ObjectId[];
+  readonly memberIds?: ObjectId[];
 }

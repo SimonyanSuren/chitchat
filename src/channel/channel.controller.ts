@@ -79,7 +79,7 @@ export class ChannelController {
         `Channel with "${name}" name already exists for current user.`
       );
 
-    const isCurrentUserIdExistInMemberIds = memberIds.some((id) =>
+    const isCurrentUserIdExistInMemberIds = memberIds?.some((id) => 
       id.equals(currentUser.id)
     );
 

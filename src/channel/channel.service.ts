@@ -17,7 +17,7 @@ export class ChannelService {
     channel.ownerId = ownerId;
     channel.name = name;
     channel.isPrivate = isPrivate;
-    channel.members = [ownerId, ...memberIds];
+    channel.members = [ownerId, ...(memberIds?.length ? memberIds : [])];
 
     return this.repositories.CHANNEL.create(channel);
   }
