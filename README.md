@@ -16,6 +16,10 @@ You need the following tools installed on your system:
 
 - [Docker](https://www.docker.com/get-started)
 
+### Environment Variables Configuration
+
+Before running the API, you must configure the required environment variables.
+
 ### Docker Setup
 
 1. Clone this repository to your local machine:
