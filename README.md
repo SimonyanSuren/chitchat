@@ -43,15 +43,15 @@ $ sudo chown 999:999 ./.docker/mongodb/file.key
 Use Docker Compose to start the application containers:
 
 ```bash
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
-This command will start the Chat Application, including the MongoDB database, in detached mode. You can access the application swagger UI in your web browser at http://localhost:9090/swagger.
+This command will start the Node.js server, including the MongoDB database, in detached mode. You can access the application swagger UI in your web browser at http://localhost:9090/swagger.
 
 ### Stopping the Application
 
 To stop the application and remove the containers, run:
 
 ```bash
-$ docker-compose down
+$ docker compose down
 ```
