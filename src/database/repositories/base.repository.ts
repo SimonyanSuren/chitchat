@@ -16,6 +16,7 @@ import {
   UpdateQuery,
   UpdateWithAggregationPipeline,
   UpdateWriteOpResult,
+  mongo,
 } from 'mongoose';
 import { IPagination } from '../../common/interfaces/pagination.interface';
 import { IBaseRepository } from './base.repository.interface';
@@ -124,8 +125,18 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
     return this._model.exists({ ...(id ? { _id: id } : {}), ...filter }).exec();
   }
 
-  public async deleteById(id: ObjectId | string): Promise<T | null> {
-    return this._model.findByIdAndDelete(id).exec();
+  public async deleteById(
+    id: ObjectId | string,
+    options?: QueryOptions<T> | null
+  ): Promise<T | null> {
+    return this._model.findByIdAndDelete(id, options).exec();
+  }
+
+  public deleteMany(
+    filter?: FilterQuery<T>,
+    options?: QueryOptions<T>
+  ): QueryWithHelpers<mongo.DeleteResult, T, any> {
+    return this._model.deleteMany(filter, options).exec();
   }
 
   public aggregate(

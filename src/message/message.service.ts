@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Repositories } from '../database/repositories';
 import { SendMessageDto } from './dto/send.dto';
-import { Message } from './entities/message.entity';
 import { UpdateMessageDto } from './dto/update.dto';
+import { Message } from './entities/message.entity';
 
 @Injectable()
 export class MessageService {
@@ -46,17 +46,9 @@ export class MessageService {
     return this.repositories.MESSAGE.find({ channel: channelId });
   }
 
-  //public async isChannelNameAlreadyExist(
-  //  ownerId: ObjectId,
-  //  name: string
-  //): Promise<{ _id: Channel['id'] } | null> {
-  //  return this.repositories.CHANNEL.exists({ ownerId: ownerId, name: name });
-  //}
-
-  //public async findChannelByUserId(
-  //  id: ObjectId,
-  //  userId: ObjectId
-  //): Promise<Channel | null> {
-  //  return this.repositories.CHANNEL.findOne({ id, members: { $in: [userId] } });
-  //}
+  // Ideal solution will be to implement soft delete messages instead of hard deleting
+  // TODO: Implement soft delete
+  public async delete(id: ObjectId): Promise<Message | null> {
+    return this.repositories.MESSAGE.deleteById(id);
+  }
 }

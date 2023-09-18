@@ -13,6 +13,7 @@ import {
   UpdateQuery,
   UpdateWithAggregationPipeline,
   UpdateWriteOpResult,
+  mongo,
 } from 'mongoose';
 import { IPagination } from '../../common/interfaces/pagination.interface';
 
@@ -57,5 +58,9 @@ export interface IBaseRepository<T extends Document> {
   ): Query<UpdateWriteOpResult | null, T>;
   exists({ id, ...filter }: FilterQuery<T>): Promise<{ _id: InferId<T> } | null>;
   deleteById(id: ObjectId | string): Promise<T | null>;
+  deleteMany(
+    filter?: FilterQuery<T>,
+    options?: QueryOptions<T>
+  ): QueryWithHelpers<mongo.DeleteResult, T, any>;
   aggregate(pipeline?: PipelineStage[], options?: AggregateOptions): Aggregate<Array<T>>;
 }

@@ -7,6 +7,10 @@ import {
 import { Document } from 'mongoose';
 import { GenericResponse } from '../interfaces/response.interface';
 
+/** 
+   MongooseClassSerializer interceptor detect @Exclude, @Expose, @Transform 
+	 decorators in returned payload from controllers. And make appropriate changes.
+*/
 function MongooseClassSerializer<T>(
   classToIntercept: ClassConstructor<T>
 ): typeof ClassSerializerInterceptor {
@@ -19,7 +23,9 @@ function MongooseClassSerializer<T>(
       return plainToInstance<T, PlainLiteralObject>(classToIntercept, payload.toJSON());
     }
 
-    private prepareResponse(payload: PlainLiteralObject | PlainLiteralObject[]) {
+    private prepareResponse(
+      payload: PlainLiteralObject | PlainLiteralObject[]
+    ): PlainLiteralObject | PlainLiteralObject[] {
       if (Array.isArray(payload)) {
         return payload.map(this.changePlainObjectToClass);
       }

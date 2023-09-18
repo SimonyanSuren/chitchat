@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Repositories } from '../database/repositories';
-import { UpdateUserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -10,11 +9,4 @@ export class UserService {
   public async getUserById(id: ObjectId): Promise<User | null> {
     return this.repositories.USER.findById(id);
   }
-
-  //public async updateUserData(
-  //  id: ObjectId,
-  //  updateData: UpdateUserDto
-  //): Promise<User | null> {
-  //  return this.repositories.USER.findByIdAndUpdate(id, updateData);
-  //}
 }

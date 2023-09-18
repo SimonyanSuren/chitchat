@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ArrayMaxSize, ArrayMinSize, ArrayUnique, IsArray } from 'class-validator';
-import { OneMemberIfPrivate, ValidateAndTransformMongoId } from '../../common/decorators';
+import { ValidateAndTransformMongoId } from '../../common/decorators';
 
 export class AddMembersDto {
   /**
@@ -16,6 +16,5 @@ export class AddMembersDto {
     each: true,
     message: 'each value in memberIds must be a valid MongoDB Id',
   })
-  @OneMemberIfPrivate()
   readonly memberIds: ObjectId[];
 }

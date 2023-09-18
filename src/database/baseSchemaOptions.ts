@@ -9,11 +9,11 @@ type QueryWithConditions = Query<any, any, any> & {
   };
 };
 
+// Mongoose schema plugin for
 export const mongooseBaseSchemaOptionsPlugin = (schema: Schema): void => {
   const schemaTimestamps =
     schema.get('timestamps') !== undefined ? schema.get('timestamps') : true;
 
-  //schema.set('optimisticConcurrency', true);
   schema.set('timestamps', schemaTimestamps);
   schema.set('versionKey', false);
   schema.set('virtuals', true);
@@ -39,6 +39,8 @@ export const mongooseBaseSchemaOptionsPlugin = (schema: Schema): void => {
     },
   });
 
+  // This middleware give possibility to use mongoose queries with filter "id" instead of "_id".
+  // Purpose to have one general query filtering logic in project regard to "id" field.
   schema.pre(
     ['find', 'findOne', 'findOneAndUpdate', 'updateOne'],
     function (next: CallbackWithoutResultAndOptionalError) {

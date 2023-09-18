@@ -44,8 +44,7 @@ export class AuthController {
   @Post('sign-up')
   @Public()
   @ApiOperation({
-    description:
-      'Sign up. After sign up, you will get confirmation email from Tangerbet. Please confirm email address.',
+    description: 'Sign up',
     summary: 'Sign Up',
   })
   @ApiCustomResponse({

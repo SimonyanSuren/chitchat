@@ -5,7 +5,7 @@ import {
   HttpException,
   Logger,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { IErrorResponse } from './errorResponse.interface';
 
 @Catch(HttpException)
@@ -14,11 +14,9 @@ export class BaseExceptionFilter<T extends HttpException> implements ExceptionFi
 
   public catch(exception: HttpException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
-    const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
-    this.logger.error(' \x1b[41m ', request.route?.path, ` [0m `);
-    console.log(exception);
+    this.logger.error(exception);
 
     const exceptionResponse: string | Record<string, any> = exception.getResponse();
     const statusCode = exception.getStatus();

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   HttpStatus,
@@ -39,6 +40,7 @@ export class MessageController {
     private readonly channelService: ChannelService
   ) {}
 
+  // @TODO: Implement WebSockets for messaging
   @Post()
   @ApiOperation({
     description: 'Send a message to a channel.',
@@ -86,6 +88,45 @@ export class MessageController {
     };
   }
 
+  @Get()
+  @ApiOperation({
+    description: 'Get channel messages',
+    summary: 'Get channels messages',
+  })
+  @ApiCustomResponse({
+    status: HttpStatus.OK,
+    model: Message,
+    isArray: true,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    type: IErrorResponse,
+  })
+  @ApiParam({
+    name: 'channelId',
+    type: String,
+    required: true,
+  })
+  public async getChannelMessages(
+    @ReqUser() currentUser: User,
+    @Param('channelId', MongoIdValidationPipe) channelId: ObjectId
+  ): Promise<GenericResponse<Message>> {
+    const isUserExistInChannel = await this.channelService.findChannelByIdAndUserId(
+      channelId,
+      currentUser.id
+    );
+
+    if (!isUserExistInChannel)
+      throw new ForbiddenException(`Permission denied. Alien channel.`);
+
+    const messages = await this.messageService.getMessagesByChannelId(channelId);
+
+    return {
+      success: true,
+      payload: messages,
+    };
+  }
+
   @Patch(':messageId')
   @ApiOperation({
     description: 'Update message by channel and message Id',
@@ -117,7 +158,7 @@ export class MessageController {
     type: UpdateMessageDto,
     required: true,
   })
-  public async addMembers(
+  public async updateMessage(
     @ReqUser() currentUser: User,
     @Param('channelId', MongoIdValidationPipe) channelId: ObjectId,
     @Param('messageId', MongoIdValidationPipe) messageId: ObjectId,
@@ -142,15 +183,18 @@ export class MessageController {
     };
   }
 
-  @Get()
+  @Delete(':messageId')
   @ApiOperation({
-    description: 'Get channel messages',
-    summary: 'Get channels messages',
+    description: 'Remove message by channel and message Id',
+    summary: 'Remove message',
   })
   @ApiCustomResponse({
     status: HttpStatus.OK,
     model: Message,
-    isArray: true,
+  })
+  @ApiNotFoundResponse({
+    status: HttpStatus.NOT_FOUND,
+    type: IErrorResponse,
   })
   @ApiForbiddenResponse({
     status: HttpStatus.FORBIDDEN,
@@ -161,23 +205,32 @@ export class MessageController {
     type: String,
     required: true,
   })
-  public async getUserChannels(
+  @ApiParam({
+    name: 'messageId',
+    type: String,
+    required: true,
+  })
+  public async deleteMessage(
     @ReqUser() currentUser: User,
-    @Param('channelId', MongoIdValidationPipe) channelId: ObjectId
+    @Param('channelId', MongoIdValidationPipe) channelId: ObjectId,
+    @Param('messageId', MongoIdValidationPipe) messageId: ObjectId
   ): Promise<GenericResponse<Message>> {
-    const isUserExistInChannel = await this.channelService.findChannelByIdAndUserId(
-      channelId,
-      currentUser.id
+    const existingMessage = await this.messageService.findMessageByIdAndChannelId(
+      messageId,
+      channelId
     );
 
-    if (!isUserExistInChannel)
-      throw new ForbiddenException(`Permission denied. Alien channel.`);
+    if (!existingMessage)
+      throw new NotFoundException(`Message with id ${messageId} not found.`);
 
-    const messages = await this.messageService.getMessagesByChannelId(channelId);
+    if (!existingMessage.senderId.equals(currentUser.id))
+      throw new ForbiddenException(`Permission denied. Alien message.`);
+
+    await this.messageService.delete(messageId);
 
     return {
       success: true,
-      payload: messages,
+      payload: existingMessage,
     };
   }
 }

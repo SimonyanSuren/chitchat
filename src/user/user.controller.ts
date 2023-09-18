@@ -1,22 +1,22 @@
 import {
-  Body,
   Controller,
   Get,
   HttpStatus,
-  NotFoundException,
-  Patch,
   UnauthorizedException,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiDefaultResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiDefaultResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import MongooseClassSerializer from '../common/Interceptors/mongooseClassSerializer.interceptor';
-import { ApiCustomResponse, Public, ReqUser } from '../common/decorators';
+import { ApiCustomResponse, ReqUser } from '../common/decorators';
 import { IErrorResponse } from '../common/filters/errorResponse.interface';
 import { GenericResponse } from '../common/interfaces/response.interface';
-import { UpdateUserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
-import { Types } from 'mongoose';
 
 @Controller('user')
 @ApiTags('User')
@@ -25,7 +25,7 @@ import { Types } from 'mongoose';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
+  @Get('info')
   @ApiOperation({
     description: 'Get current user data',
     summary: 'Get current user data',
@@ -34,14 +34,15 @@ export class UserController {
     status: HttpStatus.OK,
     model: User,
   })
-	@Public()
-
+  @ApiUnauthorizedResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    type: IErrorResponse,
+  })
   public async getCurrentUser(
     @ReqUser() currentUser: User
   ): Promise<GenericResponse<User>> {
-    const existingUser = await this.userService.getUserById(
-			new Types.ObjectId('64ff1f5b240d73b73583185e')
-		);
+    const existingUser = await this.userService.getUserById(currentUser.id);
+
     if (!existingUser) throw new UnauthorizedException();
 
     return {
@@ -49,31 +50,4 @@ export class UserController {
       payload: existingUser,
     };
   }
-
-  //@Patch()
-  //@ApiOperation({
-  //  description: 'Update current user data',
-  //  summary: 'Update current user data',
-  //})
-  //@ApiCustomResponse({
-  //  status: HttpStatus.OK,
-  //  model: User,
-  //})
-  //@ApiBody({
-  //  type: UpdateUserDto,
-  //  required: true,
-  //})
-  //public async updateUser(
-  //  @ReqUser() currentUser: User,
-  //  @Body() updateData: UpdateUserDto
-  //): Promise<GenericResponse<User>> {
-  //  const updatedUser = await this.userService.updateUserData(currentUser.id, updateData);
-
-  //  if (!updatedUser) throw new NotFoundException('User does not exist.');
-
-  //  return {
-  //    success: true,
-  //    payload: updatedUser,
-  //  };
-  //}
 }

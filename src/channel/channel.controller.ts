@@ -3,6 +3,7 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   HttpStatus,
@@ -31,6 +32,7 @@ import { ChannelService } from './channel.service';
 import { AddMembersDto } from './dto/addMembers.dto';
 import { CreateChannelDto } from './dto/create.dto';
 import { Channel } from './entities/channel.entity';
+import { UpdateChannelDto } from './dto/update.dto';
 
 @Controller()
 @ApiTags('Channel')
@@ -79,7 +81,7 @@ export class ChannelController {
         `Channel with "${name}" name already exists for current user.`
       );
 
-    const isCurrentUserIdExistInMemberIds = memberIds?.some((id) => 
+    const isCurrentUserIdExistInMemberIds = memberIds.some((id) =>
       id.equals(currentUser.id)
     );
 
@@ -93,6 +95,74 @@ export class ChannelController {
     return {
       success: true,
       payload: channel,
+    };
+  }
+
+  @Get()
+  @ApiOperation({
+    description: 'Get current user channels',
+    summary: 'Get user channels',
+  })
+  @ApiCustomResponse({
+    status: HttpStatus.OK,
+    model: Channel,
+    isArray: true,
+  })
+  public async getUserChannels(
+    @ReqUser() currentUser: User
+  ): Promise<GenericResponse<Channel>> {
+    const channels = await this.channelService.getChannelsByUserId(currentUser.id);
+
+    return {
+      success: true,
+      payload: channels,
+    };
+  }
+
+  @Patch(':channelId')
+  @ApiOperation({
+    description: 'Update channel',
+    summary: 'Update  channel',
+  })
+  @ApiCustomResponse({
+    status: HttpStatus.OK,
+    model: Channel,
+  })
+  @ApiNotFoundResponse({
+    status: HttpStatus.NOT_FOUND,
+    type: IErrorResponse,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    type: IErrorResponse,
+  })
+  @ApiParam({
+    name: 'channelId',
+    type: String,
+    required: true,
+  })
+  @ApiBody({
+    type: UpdateChannelDto,
+    required: true,
+  })
+  public async updateChannel(
+    @ReqUser() currentUser: User,
+    @Param('channelId', MongoIdValidationPipe) channelId: ObjectId,
+    @Body() updateData: UpdateChannelDto
+  ): Promise<GenericResponse<Channel>> {
+    const existingChannel = await this.channelService.findChannelById(channelId);
+
+    if (!existingChannel)
+      throw new NotFoundException(`Channel with id ${channelId} not found.`);
+
+    if (!existingChannel.ownerId.equals(currentUser.id))
+      throw new ForbiddenException(`Permission denied. Alien channel.`);
+
+    const channel = await this.channelService.update(channelId, updateData);
+
+    return {
+      success: true,
+      payload: channel!,
     };
   }
 
@@ -149,24 +219,45 @@ export class ChannelController {
     };
   }
 
-  @Get()
+  @Delete(':channelId')
   @ApiOperation({
-    description: 'Get current user channels',
-    summary: 'Get user channels',
+    description: 'Remove channel and associated messages',
+    summary: 'Remove channel',
   })
   @ApiCustomResponse({
     status: HttpStatus.OK,
     model: Channel,
-    isArray: true,
   })
-  public async getUserChannels(
-    @ReqUser() currentUser: User
+  @ApiNotFoundResponse({
+    status: HttpStatus.NOT_FOUND,
+    type: IErrorResponse,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    type: IErrorResponse,
+  })
+  @ApiParam({
+    name: 'channelId',
+    type: String,
+    required: true,
+  })
+  public async deleteChannel(
+    @ReqUser() currentUser: User,
+    @Param('channelId', MongoIdValidationPipe) channelId: ObjectId
   ): Promise<GenericResponse<Channel>> {
-    const channels = await this.channelService.getChannelsByUserId(currentUser.id);
+    const existingChannel = await this.channelService.findChannelById(channelId);
+
+    if (!existingChannel)
+      throw new NotFoundException(`Channel with id ${channelId} not found.`);
+
+    if (!existingChannel.ownerId.equals(currentUser.id))
+      throw new ForbiddenException(`Permission denied. Alien Channel.`);
+
+    await this.channelService.deleteChanelAndRelatedMessages(channelId);
 
     return {
       success: true,
-      payload: channels,
+      payload: existingChannel,
     };
   }
 }

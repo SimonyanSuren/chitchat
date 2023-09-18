@@ -27,16 +27,14 @@ export class CreateChannelDto {
    * User Ids to add to channel.
    */
   @ApiProperty({ type: String, isArray: true })
-  @IsOptional()
   @IsArray()
   @ArrayUnique()
   // Maximum members allowed to be added
   @ArrayMaxSize(10)
-  @ArrayMinSize(1)
   @ValidateAndTransformMongoId({
     each: true,
     message: 'each value in memberIds must be a valid MongoDB Id',
   })
   @OneMemberIfPrivate()
-  readonly memberIds?: ObjectId[];
+  readonly memberIds: ObjectId[];
 }

@@ -19,9 +19,12 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
     if (!user) {
       throw new UnauthorizedException();
-    } else if (!user.emailConfirmed) {
-      throw new UnauthorizedException('Email not confirmed.');
     }
+
+    // @TODO: Implement email verification
+    //else if (!user.emailConfirmed) {
+    //  throw new UnauthorizedException('Email not confirmed.');
+    //}
 
     return user;
   }

@@ -50,8 +50,10 @@ export class User {
     type: Date,
     default: null,
   })
+  // Use @Exclude decorator to slice properties(maybe sensitive data or else) from user data
+  // Decorators was detected by MongooseClassSerializer interceptor after execution returned from appropriate controller
   @Exclude()
-  public lastLogin: Date;
+  public lastLogin: Date | null;
 
   @Prop({ type: Date, default: Date.now })
   public createdAt: Date;

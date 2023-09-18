@@ -21,12 +21,15 @@ export class Message {
   @Prop({ type: String, required: true })
   public content: string;
 
+  @ApiProperty({ type: String, format: 'ObjectId' })
   @Prop({ type: mongooseSchema.Types.ObjectId, ref: Message.name, default: null })
   public parentId: ObjectId | null;
 
+  @ApiProperty({ type: String, format: 'ObjectId' })
   @Prop({ type: mongooseSchema.Types.ObjectId, ref: Channel.name })
   public channel: Channel | ObjectId;
 
+  @ApiProperty({ type: String, format: 'ObjectId' })
   @Prop({ type: mongooseSchema.Types.ObjectId, ref: User.name })
   public senderId: ObjectId;
 
