@@ -1,7 +1,10 @@
-# Chat Application (Dockerized)
+# ChitChat Application API (Dockerized)
 
-Welcome to our Chat Application! This application allows you to chat with others.
-It has been containerized using Docker for easy deployment and management.
+Welcome to the ChitChat Application API! This backend service is an integral part of the ChitChat messaging application. The ChitChat Application API has been containerized using Docker for simplified deployment and efficient management.
+
+## Overview
+
+ChitChat is a messaging application designed to facilitate seamless communication among users. This repository represents the backend of the ChitChat application, which has been developed using the NestJS framework and relies on MongoDB as its database.
 
 ## Getting Started
 
@@ -45,7 +48,8 @@ $ docker-compose up -d
 
 This command will start the Chat Application, including the MongoDB database, in detached mode. You can access the application swagger UI in your web browser at http://localhost:9090/swagger.
 
-Stopping the Application
+### Stopping the Application
+
 To stop the application and remove the containers, run:
 
 ```bash
