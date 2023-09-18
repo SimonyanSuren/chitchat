@@ -38,6 +38,5 @@ WORKDIR /app/chitchat-api
 
 COPY --chown=node:node --from=build /app/chitchat-api/node_modules ./node_modules
 COPY --chown=node:node --from=build /app/chitchat-api/dist ./dist
-COPY --chown=node:node --from=build /app/chitchat-api/assets ./assets
 COPY package.json ./ 
 

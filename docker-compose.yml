@@ -7,12 +7,12 @@ services:
     image: chitchat-api
     build:
       context: .
-    #entrypoint: sh -c 'sleep 20 && npm run start:prod'
-      ### For development run
-      target: development
-    entrypoint: sh -c 'sleep 5 && npm run dev'
-    volumes:
-      - ./src:/app/chitchat-api/src
+    entrypoint: sh -c 'sleep 20 && npm run start:prod'
+    ### For development run
+    #  target: development
+    #entrypoint: sh -c 'sleep 20 && npm run dev'
+    #volumes:
+    #  - ./src:/app/chitchat-api/src
     ###
     env_file:
       - .env
